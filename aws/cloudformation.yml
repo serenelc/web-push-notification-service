@@ -1,0 +1,616 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: "bertha"
+  MaxCapacity:
+    Type: String
+    Default: 15
+  MinCapacity:
+    Type: String
+    Default: 2
+  DesiredCount:
+    Type: String
+    Default: 2
+  ReservedMemory:
+    Type: String
+    Default: 256
+  MemoryUpperThreshold:
+    Type: String
+    Default: 60.0
+  MemoryLowerThreshold:
+    Type: String
+    Default: 20.0
+  InstanceType:
+    Type: String
+    Default: t2.medium
+  BuildNumber:
+    Type: String
+  DomainName:
+    Type: String
+  HostedZoneName:
+    Type: String
+  Cluster:
+    Type: String
+  CacheNodeType:
+    Type: String
+    Default: cache.t2.medium
+
+Conditions:
+  IsProd: !Equals [ !Ref Environment, production ]
+
+Resources:
+  # DNS
+  DNSRecord:
+    DependsOn: [LoadBalancer]
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt LoadBalancer.DNSName
+        EvaluateTargetHealth: false
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
+      HostedZoneName: !Ref HostedZoneName
+
+  # Load balancers and target groups
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      Subnets:
+      - !ImportValue SubnetAppPublicA
+      - !ImportValue SubnetAppPublicB
+      - !ImportValue SubnetAppPublicC
+      SecurityGroups:
+      - !Ref LoadBalancerSecurityGroup
+      Tags:
+      - Key: CreatedBy
+        Value: stuart.campbell
+      - Key: OwnedBy
+        Value: user-journeys
+      - Key: Environment
+        Value: !Sub ${Environment}
+      - Key: Name
+        Value: !Sub web-push-service-${Environment}-load-balancer
+      - Key: Platform
+        Value: shared
+      - Key: Runbook
+        Value: https://bitbucket.org/trinitymirror-ondemand/web-push-service/
+
+  LoadBalancerListener:
+    DependsOn: [LoadBalancer, LoadBalancerTargetGroup]
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+      - CertificateArn: !If [IsProd, "arn:aws:acm:eu-west-1:743677148328:certificate/7871b28e-8790-4b02-b1d9-e13473fa9bbc", !ImportValue tm-aws-SSL-certificate]
+      DefaultActions:
+      - TargetGroupArn: !Ref LoadBalancerTargetGroup
+        Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+
+  HTTPLoadBalancerListener:
+    DependsOn: [LoadBalancer, LoadBalancerTargetGroup]
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - TargetGroupArn: !Ref LoadBalancerTargetGroup
+        Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  LoadBalancerTargetGroup:
+    DependsOn: [LoadBalancer]
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: ip
+      VpcId: !ImportValue VPCID
+      Protocol: HTTP
+      Port: 3000 # relevant for awsvpc docker containers!
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /AWSHealthCheck
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: 5
+      - Key: stickiness.enabled
+        Value: true
+      - Key: stickiness.type
+        Value: lb_cookie
+
+  # Service and task
+  Service:
+    DependsOn: [LoadBalancerListener]
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref TaskDefinition
+      DesiredCount: !If [IsProd, !Ref DesiredCount, 1]
+      LoadBalancers:
+      - ContainerName: "web-push-service"
+        ContainerPort: 3000
+        TargetGroupArn: !Ref LoadBalancerTargetGroup
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 50
+      PlacementStrategies:
+        - Type: spread
+          Field: attribute:ecs.availability-zone
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+          - !Ref AppSecurityGroup
+          Subnets:
+          - !ImportValue SubnetAppPrivateA
+          - !ImportValue SubnetAppPrivateB
+          - !ImportValue SubnetAppPrivateC
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: web-push-service
+      TaskRoleArn: !Ref TaskRole
+      NetworkMode: awsvpc
+      ContainerDefinitions:
+      - Name: "web-push-service"
+        Image: !Sub 430105358689.dkr.ecr.eu-west-1.amazonaws.com/com.trinitymirror/web-push-service:${BuildNumber}
+        Environment:
+          - Name: NODE_ENV
+            Value: !Ref Environment
+        Memory: !Ref ReservedMemory
+        PortMappings:
+        - ContainerPort: 3000
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroup
+            awslogs-region: !Ref 'AWS::Region'
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 30
+
+  ScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: !Ref MaxCapacity
+      MinCapacity: !If [IsProd, !Ref MinCapacity, 1]
+      ResourceId: !Join
+        - '/'
+        - - 'service'
+          - !Ref Cluster
+          - !GetAtt Service.Name
+      RoleARN: !GetAtt ApplicationAutoScalingRole.Arn
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  MemoryScaleUpPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: MemoryScaleUpPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 1
+
+  MemoryScaleDownPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: MemoryScaleDownPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalUpperBound: 0
+            ScalingAdjustment: -1
+
+  ScaleUpAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmDescription: Exceeded maximum memory allocation
+      Dimensions:
+        - Name: ServiceName
+          Value: !GetAtt Service.Name
+        - Name: ClusterName
+          Value: !Ref Cluster
+      MetricName: MemoryUtilization
+      Statistic: Average
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: !Ref MemoryUpperThreshold
+      AlarmActions:
+        - !Ref MemoryScaleUpPolicy
+      Namespace: AWS/ECS
+      Period: 60
+      EvaluationPeriods: 1
+
+  ScaleDownAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmDescription: Minimum memory allocation reached
+      Dimensions:
+        - Name: ServiceName
+          Value: !GetAtt Service.Name
+        - Name: ClusterName
+          Value: !Ref Cluster
+      MetricName: MemoryUtilization
+      Statistic: Average
+      ComparisonOperator: LessThanThreshold
+      Threshold: !Ref MemoryLowerThreshold
+      AlarmActions:
+        - !Ref MemoryScaleDownPolicy
+      Namespace: AWS/ECS
+      Period: 60
+      EvaluationPeriods: 1
+
+  # Databases
+  ElasticacheSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Group of subnets for use by the Elasticache Cluster
+      SubnetIds:
+        - !ImportValue SubnetAppPrivateA
+        - !ImportValue SubnetAppPrivateB
+        - !ImportValue SubnetAppPrivateC
+
+  ElasticacheCluster:
+    Type: "AWS::ElastiCache::CacheCluster"
+    Properties:
+      AutoMinorVersionUpgrade: "true"
+      Engine: "redis"
+      CacheNodeType: "cache.t2.micro"
+      NumCacheNodes: "1"
+      CacheSubnetGroupName: !Ref ElasticacheSubnetGroup
+      VpcSecurityGroupIds:
+        -
+          Fn::GetAtt:
+            - ElasticacheSecurityGroup
+            - "GroupId"
+
+  ElasticacheReplicationGroup:
+    Type: "AWS::ElastiCache::ReplicationGroup"
+    Properties:
+      PrimaryClusterId: !Ref ElasticacheCluster
+      CacheNodeType: !If [IsProd, !Ref CacheNodeType, "cache.t2.micro"]
+      ReplicationGroupDescription: !Sub web-push-service Replication group for redis cluster (${Environment})
+      AutomaticFailoverEnabled: "false"
+      NumCacheClusters: "2"
+      Tags:
+      - Key: CreatedBy
+        Value: stuart.campbell
+      - Key: OwnedBy
+        Value: user-journeys
+      - Key: Environment
+        Value: !Sub ${Environment}
+      - Key: Name
+        Value: !Sub web-push-service-${Environment}-replication
+      - Key: Platform
+        Value: shared
+      - Key: Runbook
+        Value: https://bitbucket.org/trinitymirror-ondemand/web-push-service/
+
+  BackupDatabase:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "Subscription"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "Subscription"
+          KeyType: "HASH"
+      TableName: !If [ IsProd, "webPushBackup", !Sub "webPushBackup-${Environment}" ]
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: !If [ IsProd, true, false ]
+      Tags:
+        - Key: CreatedBy
+          Value: stuart.campbell
+        - Key: OwnedBy
+          Value: user-journeys
+        - Key: Environment
+          Value: !Sub ${Environment}
+        - Key: Name
+          Value: !Sub web-push-service-${Environment}-dynamo-users
+        - Key: Platform
+          Value: shared
+        - Key: Runbook
+          Value: https://bitbucket.org/trinitymirror-ondemand/web-push-service/
+
+  NotificationLogs:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "ID"
+          AttributeType: "S"
+        -
+          AttributeName: "Publication"
+          AttributeType: "S"
+        -
+          AttributeName: "Timestamp"
+          AttributeType: "N"
+      KeySchema:
+        -
+          AttributeName: "ID"
+          KeyType: "HASH"
+        -
+          AttributeName: "Timestamp"
+          KeyType: "RANGE"
+      TableName: !If [ IsProd, "webPushLogs", !Sub "webPushLogs-${Environment}" ]
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "SortIndex"
+          KeySchema:
+            -
+              AttributeName: "Publication"
+              KeyType: "HASH"
+            -
+              AttributeName: "Timestamp"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: !If [ IsProd, true, false ]
+      Tags:
+        - Key: CreatedBy
+          Value: stuart.campbell
+        - Key: OwnedBy
+          Value: user-journeys
+        - Key: Environment
+          Value: !Sub ${Environment}
+        - Key: Name
+          Value: !Sub web-push-service-${Environment}-dynamo-notifications
+        - Key: Platform
+          Value: shared
+        - Key: Runbook
+          Value: https://bitbucket.org/trinitymirror-ondemand/web-push-service/
+
+  BackupReadCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MinCapacity: !If [IsProd, 3, 1]
+        MaxCapacity: 50
+        ResourceId: !Join [/, [table, !Ref BackupDatabase]]
+        RoleARN: !GetAtt BackupScalingRole.Arn
+        ScalableDimension: dynamodb:table:ReadCapacityUnits
+        ServiceNamespace: dynamodb
+
+  BackupWriteCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MinCapacity: !If [IsProd, 5, 1]
+      MaxCapacity: 50
+      ResourceId: !Join [/, [table, !Ref BackupDatabase]]
+      RoleARN: !GetAtt BackupScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+
+  # IAM and service roles
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: ['ecs-tasks.amazonaws.com']
+      Path: /
+      Policies:
+      - PolicyName: "ECR-and-logs"
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - "ecr:GetDownloadUrlForLayer"
+            - "ecr:BatchGetImage"
+            - "ecr:DescribeImages"
+            - "ecr:GetAuthorizationToken"
+            - "ecr:DescribeRepositories"
+            - "ecr:ListImages"
+            - "ecr:BatchCheckLayerAvailability"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+            - "cloudwatch:PutMetricData"
+            Resource:
+            - "*"
+      - PolicyName: "Parameter-Store-Access"
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - "ssm:DescribeParameters"
+            - "ssm:GetParameters"
+            - "ssm:GetParametersByPath"
+            Resource:
+            - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/webPush/*
+      - PolicyName: "DynamoDB-Access"
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - "dynamodb:*"
+            Resource:
+            - !If [IsProd, !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/webPushBackup", !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/webPushBackup-${Environment}"]
+            - !If [IsProd, !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/webPushLogs", !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/webPushLogs-${Environment}"]
+            - !If [IsProd, !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/webPushLogs/*", !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/webPushLogs-${Environment}/*"]
+
+  BackupScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - application-autoscaling.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:DescribeTable
+            - dynamodb:UpdateTable
+            Resource: !GetAtt BackupDatabase.Arn
+          - Effect: Allow
+            Action:
+            - cloudwatch:PutMetricAlarm
+            - cloudwatch:DescribeAlarms
+            - cloudwatch:DeleteAlarms
+            - cloudwatch:GetMetricStatistics
+            - cloudwatch:SetAlarmState
+            Resource: '*'
+
+  BackupReadScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref BackupReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+  BackupWriteScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref BackupWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+  ApplicationAutoScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: ['application-autoscaling.amazonaws.com']
+      Path: /
+      Policies:
+      - PolicyName: "ECS"
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - "ecs:DescribeServices"
+            - "ecs:UpdateService"
+            Resource:
+            - "*"
+      - PolicyName: "Cloudwatch"
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - "cloudwatch:DescribeAlarms"
+            Resource:
+            - "*"
+
+  # Security groups
+  ElasticacheSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Elasticache Security Group"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: "6379"
+          ToPort: "6379"
+          CidrIp: !If [IsProd, "172.17.0.0/16", "172.18.0.0/16"]
+        - IpProtocol: "tcp"
+          FromPort: "6379"
+          ToPort: "6379"
+          CidrIp: "10.0.0.0/8"
+      VpcId: !ImportValue VPCID
+      Tags:
+      - Key: CreatedBy
+        Value: stuart.campbell
+      - Key: OwnedBy
+        Value: user-journeys
+      - Key: Environment
+        Value: !Sub ${Environment}
+      - Key: Name
+        Value: !Sub web-push-service-${Environment}-security-group
+      - Key: Platform
+        Value: shared
+      - Key: Runbook
+        Value: https://bitbucket.org/trinitymirror-ondemand/web-push-service/
+
+  ECSInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "SSH Access"
+      VpcId: !ImportValue VPCID
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: "22"
+          ToPort: "22"
+          CidrIp: "0.0.0.0/0"
+
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow access to the APP port"
+      VpcId: !ImportValue VPCID
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: "3000"
+          ToPort: "3000"
+          CidrIp: "0.0.0.0/0"
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow HTTPS access to load balancer"
+      VpcId: !ImportValue VPCID
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: "443"
+          ToPort: "443"
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: "tcp"
+          FromPort: "80"
+          ToPort: "80"
+          CidrIp: "0.0.0.0/0"

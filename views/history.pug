@@ -1,0 +1,42 @@
+extends index
+
+block content
+  script(src='./scripts/history.js')
+
+  div(class='history-page')
+    div(class='full-history')
+      h2 Sent Notifications
+      h4 (Channel URL: #{publication})
+      button.download(onclick=`downloadCSV("${publication}")`) Download CSV
+    
+    table(class='full-history-table')
+      thead
+        tr(class='table-heading-active')
+          th Info
+          th Body
+          th Url
+          th Date/Time
+          th Email
+          th Silent?
+
+      tbody
+        if data && data.Items && data.Items.length > 0
+          each notification in data.Items
+            - var email = notification.Email && notification.Email.S
+              tr
+                td
+                  a(onclick=`showInfo(${notification.Responses.S},${notification.SendDuration && notification.SendDuration.N})`) info
+                td= notification.Body.S
+                td= notification.Url.S
+                td= (new Date(parseInt(notification.Timestamp.N))).toLocaleString('en-GB')
+                td
+                  a(href=`mailto:${email}`)=email
+                td= notification.Silent && notification.Silent.BOOL ? "Silent": "-"
+
+  if data
+    .navigation
+      if prevKey !== null && prevKey !== undefined
+        a(href=`/sent?publication=${publication}&currentKey=${prevKey}`) < previous page
+      if data.LastEvaluatedKey
+        - const nextKey = Buffer.from(JSON.stringify(data.LastEvaluatedKey)).toString('base64')
+        a(href=`/sent?publication=${publication}&currentKey=${nextKey}&prevKey=${currentKey || ''}`) next page >

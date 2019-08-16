@@ -1,0 +1,88 @@
+extends index
+
+block content
+    div(class='publication-active' id='publication')
+        h2(class='publication-heading')
+            div(class='number') 1 
+            div(class='title') Choose Target
+        h3(class='bookmarks') Bookmarked Publications
+        div(class='bookmark-list')
+        h3(class='search-caption') Search Publications
+        form(autocomplete='off')
+            div(class="search" id="search-publication")
+                input(class="my-publication" type="text" placeholder="Type publication's name")                 
+    div(class='channel-inactive mobile' id='channel')
+        h2(class='channel-heading')
+            div(class='number') 2 
+            div(class='title') Choose a channel
+        div(class='align-contents')
+            h3(class='search-caption') Channels:
+        form(autocomplete='off')
+            div(class="search" id="channel-list")
+                input(class="my-channel" type="text" disabled)  
+    div(class='notification-inactive mobile' id='notification')
+        h2(class='notification-heading') 
+            div(class='number') 3
+            div(class='title') Write the message
+        div(class='align-contents' id='notif-align')
+            h3 Message to send:
+        textarea(class='msg' id='message' disabled maxlength='40' required)
+        h4(id='remaining-characters') 40 Characters remaining
+        h3 URL:
+        input(id='url' disabled type="text" autocomplete="off" required)
+        h3 Message Preview
+        textarea(class='msg' disabled)
+        div(class='align-contents')
+            input(type="checkbox" id='silent')
+            h4 Send as silent notification
+        button(class='send-btn' disabled onclick=`sendNotification()`) Send
+                
+    div(class='notif-history mobile') 
+        div(class='history-inactive' id='history')
+            h2 Last 5 notifications sent
+            button(class='view-btn' disabled) View All Notifications
+        div(class='history-table')
+            table(class='recent-history-table')
+                tr(class='table-heading-inactive') 
+                    th Body 
+                    th URL
+                    th Date/Time 
+                    th Email 
+                - var rows = Array(5);
+                - var columns = Array(4);
+                each row in rows
+                    tr(class='rows-inactive')
+                        each column in columns
+                            td
+
+
+    div(class='success-modal')
+        div(class='modal-content')
+            span(class='close') &times;
+            h1 All Done!
+            span(class='icon')
+                img(src='/images/success.png' class='icons')
+            h2 Your notification has been sent!
+            h2 Where do you want to send the next notification to?
+            div(class='success-options')
+                button(class='send-btn' id='same-channel') Same channel
+                button(class='send-btn' id='same-publication') Different channel, same publication
+                button(class='send-btn' id='another-publication') Another publication
+    div(class='error-modal')
+        div(class='modal-content')
+            span(class='close') &times;
+            h1 Uh-oh...
+            span(class='icon')
+                img(src='/images/fail.png' class='icons')
+            h2 We couldn't send your push notification.
+            h2 If this error persists, please contact service desk.
+            div(class='success-options')
+                button(class='send-btn') Try Again
+                button(class='send-btn') Cancel
+    
+    script(src='./scripts/search.js')
+    script(src='./scripts/history.js')
+
+
+            
+

@@ -1,0 +1,137 @@
+{
+  "port": 3000,
+  "auth": {
+    "client_id": "510792416878-6viltl48k7891botuq024a4drpk2o6il.apps.googleusercontent.com",
+    "project_id": "webpush-fd4cb",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://accounts.google.com/o/oauth2/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "javascript_origins": [
+      "http://web-push-service.tm-dev-aws.com/"
+    ]
+  },
+  "sheets": {
+    "api_scopes": [
+      "https://www.googleapis.com/auth/spreadsheets.readonly"
+    ],
+    "id": "11NQ3Cskrmkgba1LYQb8Qpre4nOmyMxSuLkAvUmKHLRk",
+    "version": "v4"
+  },
+  "redisURL": "//web-el-lfr69hkx5d0i.bmj5ex.0001.euw1.cache.amazonaws.com:6379",
+  "publicKey": "BE92m7Yn0sQl3j_aDWZvCIZozapc8NjbRcQ3_cIMxhCH3MXSlf79ySgGBFCHZOKiVKBqYZnIiBMgMHgMCKv40Fw",
+  "backupTable": "webPushBackup",
+  "logTable": "webPushLogs",
+  "publications": [
+    {
+      "host": "cornwalllive.com",
+      "homepage": "www.cornwalllive.com",
+      "name": "Cornwall Live",
+      "logReceipts": true
+    },
+    {
+      "host": "devonlive.com",
+      "homepage": "www.devonlive.com",
+      "name": "Devon Live",
+      "logReceipts": true
+    },
+    {
+      "host": "chroniclelive.co.uk",
+      "homepage": "www.chroniclelive.co.uk/all-about/newcastle-united-fc",
+      "name": "Newcastle United FC",
+      "logReceipts": true
+    },
+    {
+      "host": "chroniclelive.co.uk",
+      "homepage": "www.chroniclelive.co.uk/news/",
+      "name": "Chronicle Live - News",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/3am/",
+      "name": "Mirror Celebs",
+      "group": "Mirror(excl. Sport)",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/news/politics/",
+      "name": "Mirror Politics",
+      "group": "Mirror(excl. Sport)",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/news/uk-news/",
+      "name": "Mirror UK News",
+      "group": "Mirror(excl. Sport)",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/all-about/arsenal-fc",
+      "name": "Mirror Football - Arsenal",
+      "group": "Mirror - Sport",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/all-about/chelsea-fc",
+      "name": "Mirror Football - Chelsea",
+      "group": "Mirror - Sport",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/all-about/liverpool-fc",
+      "name": "Mirror Football - Liverpool",
+      "group": "Mirror - Sport",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/all-about/manchester-city-fc",
+      "name": "Mirror Football - Man City",
+      "group": "Mirror - Sport",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/all-about/manchester-united-fc",
+      "name": "Mirror Football - Man Utd",
+      "group": "Mirror - Sport",
+      "logReceipts": true
+    },
+    {
+      "host": "mirror.co.uk",
+      "homepage": "www.mirror.co.uk/all-about/tottenham-hotspur-fc",
+      "name": "Mirror Football - Spurs",
+      "group": "Mirror - Sport",
+      "logReceipts": true
+    },
+    {
+      "host": "plymouthherald.co.uk",
+      "homepage": "www.plymouthherald.co.uk",
+      "name": "Plymouth Live",
+      "logReceipts": true
+    },
+    {
+      "host": "walesonline.co.uk",
+      "homepage": "www.walesonline.co.uk",
+      "name": "Wales Online",
+      "logReceipts": true
+    },
+    {
+      "host": "walesonline.co.uk",
+      "homepage": "www.walesonline.co.uk/sport/rugby/",
+      "name": "Wales Online Rugby",
+      "logReceipts": true
+    },
+    {
+      "host": "dailystar.co.uk",
+      "homepage": "www.dailystar.co.uk",
+      "name": "Daily Star"
+    }
+  ],
+  "notificationTTL": 43200
+}

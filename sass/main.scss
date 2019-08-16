@@ -1,0 +1,546 @@
+@import './variables.scss';
+@import './mobile.scss';
+
+body {
+  font: 14px Arial;
+}
+
+html, body {
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: $blue-grey;
+}
+
+.header {
+  background-color: $blue-grey;
+  max-height: 68px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2%;
+  a {
+    width: 100%;
+    max-height: 68px;
+    display: flex;
+  }
+}
+
+.logo {
+  float: left;
+  background-size: 150px;
+  height: 46px;
+  background-repeat: no-repeat;
+  background-image: url("/images/reach-logo.png");
+  width: 20%;
+  margin: 1%;
+}
+
+h1 {
+  color: $blue-grey;
+  font: 32px Arial-BoldMT, 'Arial Bold', 'Arial';
+  .head-title & {
+    color: $reach-yellow;
+  }
+  .modal-content & {
+    margin: 0;
+  }
+}
+
+h2 {
+  font: 20px Arial-BoldMT, "Arial Bold", Arial;
+  color: $reach-yellow;
+  display: flex;
+  width: 100%;
+  .publication-inactive &, .channel-inactive &, .notification-inactive &, .full-history &, .history-inactive &, .modal-content & {
+    color: $blue-grey;
+  }
+  #history & {
+    font: 18px Arial-BoldMT, "Arial Bold", Arial;
+    padding-left: 3%;
+  }
+  .history-inactive & {
+    float: left;
+  }
+  .modal-content & {
+    font: 'ArialMT', 'Arial';
+  }
+  .full-history & {
+    width: unset;margin-bottom: 7px;
+  }
+}
+
+.number {
+  border: 3px solid;
+  border-radius: 24px;
+  padding: 4px 13px;
+  font-size: 29px;
+}
+
+.title {
+  border-bottom: 4px solid;
+  padding-bottom: 9px;
+  margin-left: 10px;
+  width: 100%;
+  align-self: center;
+}
+
+h3 {
+  color: $blue-grey;
+  font: 18px Arial-BoldMT, "Arial Bold", Arial;
+  .publication-active &, .channel-active &, .notification-active &, .history-active & {
+    color: $reach-yellow;
+  }
+  .history-title {
+    color: $reach-yellow;
+    font: 14px;
+  }
+}
+
+h4 {
+  font: 16px Arial;
+  color: $blue-grey;
+  #notification & {
+    padding-right: 15px;
+  }
+  .notification-active & {
+    color: white;
+  }
+  .return-text & {
+    color: $reach-yellow;
+  }
+  .extra-info-div & {
+    font: 16px Arial-BoldMT, "Arial Bold", Arial;
+  }
+}
+
+#remaining-characters {
+  float: right;
+}
+
+.history-page {
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+@mixin column-details {
+  padding-left: 2%;
+  float: left;
+  margin-right: 2%;
+}
+
+#publication {
+  @include column-details;
+  min-height: 140%;
+  width: 31%;
+  margin-left: 2%;
+}
+
+.publication-active {
+  background-color: $blue-grey;
+}
+
+.publication-inactive {
+  background-color: $inactive-grey;
+}
+
+#channel {
+  @include column-details;
+  min-height: 630px;
+  width: 26%;
+}
+
+.channel-active {
+  background-color: $blue-grey;
+}
+
+.channel-inactive {
+  background-color: $inactive-grey;
+}
+
+#notification {
+  @include column-details;
+  width: 35%;
+  min-height: 106%;
+}
+
+.notification-active {
+  background-color: $blue-grey;
+}
+
+.notification-inactive {
+  background-color: $inactive-grey;
+}
+
+.notif-history {
+  min-height: 40%;
+  float: left;
+  width: 63%;
+  margin-top: 2%;
+  margin-bottom: 15%;
+}
+
+#history {
+  display: flex;
+  justify-content: space-between;
+  height: 47px;
+}
+
+.history-inactive {
+  background-color: $inactive-grey;
+}
+
+.history-active {
+  background-color: $blue-grey;
+}
+
+.full-history {
+  display: flex;
+  justify-content: space-between;
+}
+
+.return {
+  display: flex;
+  padding-right: 10px;
+}
+
+.return-text {
+  float: right;
+  color: $reach-yellow;
+  cursor: pointer;
+}
+
+.return-arrow {
+  align-self: center;
+  height: 17px;
+  padding-right: 4px;
+}
+
+.align-contents {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  #channel & {
+    justify-content: space-between;
+  }
+}
+
+#notif-align {
+  justify-content: space-between;
+}
+
+* { box-sizing: border-box; }
+
+input[type="text"] {
+  border: 1px solid black;
+  background-color: white;
+  padding: 10px;
+  font-size: 16px;
+  width: 94%;
+  &:disabled {
+    background: #d9d8d6;
+  }
+}
+
+input:focus {
+  outline:none
+}
+
+.search {
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+  background-color: inherit;
+  padding-top: 0;
+  border: none;
+}
+
+.search-items {
+  position: absolute;
+  border: 1px solid black;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.items {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid black;
+  background-color: white;
+  padding: 2px;
+  justify-content: space-evenly;
+  width: 94%;
+
+  #notification & {
+    color: $error-red;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid black;
+  }
+
+  #channel & {
+    margin-bottom: 6px;
+  }
+}
+
+.pub-logo {
+  float: left;
+  width: 40%;
+  height: 50px;
+  background-repeat: no-repeat;
+  background-size: 80px;
+  background-position: center;
+}
+
+.logoAndText {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+
+#channel-logo {
+  width: 26%;
+  height: 50px;
+  background-size: 47px;
+  margin-top: 0px;
+}
+
+.option {
+  font-size: 14px;
+  padding: 5px;
+  margin: 10px 0;
+  width: 50%;
+  cursor: pointer;
+}
+
+#channel-options {
+  background-size: 40px;
+}
+
+#channel-list {
+  overflow: auto;
+  max-height: 400px;
+}
+
+#blocked {
+  height: 30px;
+}
+
+.msg {
+  min-height: 100px;
+  resize: none;
+  outline: none;
+  font-size: 16px;
+  width: 94%;
+  padding: 10px;
+  border: 1px solid black;
+  background-color: white;
+  &:disabled {
+    background-color: $light-grey;
+  }
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 30px;
+  &.recent-history-table {
+    table-layout: fixed;
+  }
+}
+
+tr {
+  background-color: white;
+  color: $blue-grey;
+  &.table-heading-inactive {
+    height: 10%;
+    background-color: $inactive-grey;
+    text-align: center;
+  }
+  &.table-heading-active {
+    background-color: $light-grey;
+    height:10%;
+  }
+  &.rows-inactive{
+    background-color: $light-grey;
+  }
+}
+
+td, th {
+  border: 1px solid black;
+  text-align: left;
+  padding: 8px;
+  overflow: auto;
+}
+
+.recent-history-table th:nth-child(3), td:nth-child(3) {
+  width: 16%;
+}
+
+.success-options {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+button {
+  display: inline-block;
+  margin-bottom: 0;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: $reach-yellow;
+  &.view-btn {
+    float:right; 
+    margin: 1%;
+    .history-active & {
+      color: black;
+    }
+  }
+  &.send-btn {
+    float: right;
+    width: 25%;
+    white-space: normal;
+    margin-right: 10px;
+    margin-bottom: 7px;
+    .notification-active & {
+      color: black;
+    }
+  }
+  &:disabled {
+    background-color: $light-grey;
+    color: $blue-grey;
+  }
+  &.download{
+    height: 50%;
+    align-self: center;
+  }
+}
+
+.success-modal, .error-modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1; 
+  padding-top: 100px; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+  background-color: white;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid $reach-yellow;
+  width: 600px;
+}
+
+.close {
+  color: $blue-grey;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.icons {
+  max-height: 80px;
+  float: right;
+}
+
+.bookmarkIcon {
+  padding-right: 5px;
+  cursor: pointer;
+}
+
+[data-site='mirror.co.uk'] {
+  background-image: url('http://s3.mirror.co.uk/partners/branding/Mirror/logo-mirror@2x.png');
+  background-size: 86px;
+}
+[data-publication$='mirror.co.uk/3am/'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/3am/img/icon-mirror.png');
+}
+[data-publication$='mirror.co.uk/news/uk-news/'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/news/uk-news/img/icon-mirror.png');
+}
+[data-publication$='mirror.co.uk/news/politics/'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/news/politics/img/icon-mirror.png');
+}
+[data-publication$='mirror.co.uk/all-about/arsenal-fc'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/sport/football/img/icon-arsenal.png');
+}
+[data-publication$='mirror.co.uk/all-about/chelsea-fc'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/sport/football/img/icon-chelsea.png');
+}
+[data-publication$='mirror.co.uk/all-about/liverpool-fc'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/sport/football/img/icon-liverpool.png');
+}
+[data-publication$='mirror.co.uk/all-about/manchester-city-fc'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/sport/football/img/icon-mancity.png');
+}
+[data-publication$='mirror.co.uk/all-about/manchester-united-fc'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/sport/football/img/icon-manutd.png');
+}
+[data-publication$='mirror.co.uk/all-about/tottenham-hotspur-fc'] {
+  background-image: url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/mirror/sport/football/img/icon-spurs.png');
+}
+
+[data-site='cornwalllive.com'],
+[data-publication$='cornwalllive.com'] {
+  background-image: url('http://s3.mirror.co.uk/partners/branding/CornwallLive/logo-cornwalllive@2x.png');
+}
+
+[data-site='chroniclelive.co.uk'] {
+  background-image: url('http://s3.mirror.co.uk/partners/branding/ChronicleLive/logo-chroniclelive@2x.png');
+}
+[data-publication$='chroniclelive.co.uk/all-about/newcastle-united-fc'] {
+  background-image:  url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/nechronicle/img/icon-nufc.png');
+}
+[data-publication$='chroniclelive.co.uk/news/'] {
+  background-image:  url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/nechronicle/news/img/icon-nechronicle.png');
+}
+
+[data-site='devonlive.com'],
+[data-publication$='devonlive.com'] {
+  background-image: url('http://s3.mirror.co.uk/partners/branding/DevonLive/logo-devonlive@2x.png');
+}
+
+[data-site='plymouthherald.co.uk'],
+[data-publication$='plymouthherald.co.uk'] {
+  background-image: url('http://s3.mirror.co.uk/partners/branding/PlymouthLive/logo-plymouthlive@2x.png');
+}
+
+[data-site='walesonline.co.uk'],
+[data-publication$='walesonline.co.uk'] {
+  background-image: url('http://s3.mirror.co.uk/partners/branding/WalesOnline/logo-walesonline@2x.png');
+}
+[data-publication$='walesonline.co.uk/sport/rugby/'] {
+  background-image:  url('https://s2-prod.mirror.co.uk/@trinitymirrordigital/chameleon-branding/publications/walesonline/sport/rugby/img/icon-walesonline.png');
+}
+
+[data-site='dailystar.co.uk'],
+[data-publication$='dailystar.co.uk'] {
+  background-image:  url('/images/daily-star.jpg');
+  background-size: 42px;
+}

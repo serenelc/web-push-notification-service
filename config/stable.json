@@ -1,0 +1,123 @@
+{
+	"port" : 3000,
+	"auth": {
+		"client_id": "510792416878-6viltl48k7891botuq024a4drpk2o6il.apps.googleusercontent.com",
+		"project_id": "webpush-fd4cb",
+		"auth_uri": "https://accounts.google.com/o/oauth2/auth",
+		"token_uri": "https://accounts.google.com/o/oauth2/token",
+		"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+		"javascript_origins": ["http://web-push-service.tm-dev-aws.com/"]
+	},
+	"sheets" :{
+		"api_scopes" : ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+		"id": "1XExhyu3CtSN_278pHRgiydLAp2RmD1zmhqp5hGxzghY",
+		"version": "v4"
+	},
+	"redisURL": "//web-el-5ob76p6fqz1a.ncxvqj.0001.euw1.cache.amazonaws.com:6379",
+	"publicKey": "BE92m7Yn0sQl3j_aDWZvCIZozapc8NjbRcQ3_cIMxhCH3MXSlf79ySgGBFCHZOKiVKBqYZnIiBMgMHgMCKv40Fw",
+	"backupTable": "webPushBackup-stable",
+	"logTable": "webPushLogs-stable",
+	"publications": [
+		{
+			"host": "localhost",
+			"homepage": "localhost",
+			"name": "localhost"
+		},
+		{
+			"host": "cornwalllive.com",
+			"homepage": "ron-dev-pres-stable.cornwalllive.com",
+			"name": "Cornwall Live (Stable)"
+    	},
+		{
+			"host": "devonlive.com",
+			"homepage": "ron-dev-pres-stable.devonlive.com",
+			"name": "Devon Live (Stable)",
+			"logReceipts": true
+    	},
+		{
+			"host": "chroniclelive.co.uk",
+			"homepage": "reg-dev-pres-stable.chroniclelive.co.uk/all-about/newcastle-united-fc",
+			"name": "Newcastle United FC (Stable)"
+		},
+		{
+			"host": "chroniclelive.co.uk",
+			"homepage": "reg-dev-pres-stable.chroniclelive.co.uk/news/",
+			"name": "Chronicle Live - News (Stable)"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/3am/",
+			"name": "Mirror Celebs (Stable)",
+			"group": "Mirror(excl. Sport)"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/news/politics/",
+			"name": "Mirror Politics (Stable)",
+			"group": "Mirror(excl. Sport)"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/news/uk-news/",
+			"name": "Mirror UK News (Stable)",
+			"group": "Mirror(excl. Sport)"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/all-about/arsenal-fc",
+			"name": "Mirror Football - Arsenal (Stable)",
+			"group": "Mirror - Sport"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/all-about/chelsea-fc",
+			"name": "Mirror Football - Chelsea (Stable)",
+			"group": "Mirror - Sport"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/all-about/liverpool-fc",
+			"name": "Mirror Football - Liverpool (Stable)",
+			"group": "Mirror - Sport"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/all-about/manchester-city-fc",
+			"name": "Mirror Football - Man City (Stable)",
+			"group": "Mirror - Sport"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/all-about/manchester-united-fc",
+			"name": "Mirror Football - Man Utd (Stable)",
+			"group": "Mirror - Sport"
+		},
+		{
+			"host": "mirror.co.uk",
+			"homepage": "nat-dev-pres-stable.mirror.co.uk/all-about/tottenham-hotspur-fc",
+			"name": "Mirror Football - Spurs (Stable)",
+			"group": "Mirror - Sport"
+		},
+		{
+			"host": "plymouthherald.co.uk",
+			"homepage": "ron-dev-pres-stable.plymouthherald.co.uk",
+			"name": "Plymouth Live (Stable)"
+		},
+		{
+			"host": "walesonline.co.uk",
+			"homepage": "reg-dev-pres-stable.walesonline.co.uk",
+			"name": "Wales Online (Stable)"
+		},
+    {
+      "host": "walesonline.co.uk",
+      "homepage": "reg-dev-pres-stable.walesonline.co.uk/sport/rugby/",
+      "name": "Wales Online Rugby (Stable)"
+    },
+    {
+      "host": "dailystar.co.uk",
+      "homepage": "nat-dev-pres-stable.dailystar.co.uk",
+      "name": "Daily Star (Stable)"
+    }
+	],
+	"notificationTTL": 600
+}

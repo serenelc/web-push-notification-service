@@ -1,0 +1,30 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  ProductionAccountId:
+    Type: String
+    Default: 743677148328
+
+Resources:
+  ECR:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: com.trinitymirror/web-push-service
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: GrantCrossAccount
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${ProductionAccountId}:root"
+            Action:
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:DescribeImages"
+              - "ecr:GetAuthorizationToken"
+              - "ecr:DescribeRepositories"
+              - "ecr:ListImages"
+              - "ecr:BatchCheckLayerAvailability"

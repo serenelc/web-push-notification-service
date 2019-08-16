@@ -1,0 +1,138 @@
+@media only screen and (max-width: 768px) {
+    /* For mobile phones: */
+    body .logo {
+        background-size: 100px;
+        height: 34px;
+        width: 35%;
+    }
+
+    body .head-title h1 {
+        float: right;
+        margin-right: 5px;
+        font-size: 17px;
+    }
+
+    @mixin mobile-col-details {
+        float: none;
+        width: 100%;
+        margin: 0;
+        padding-top: 3px;
+        padding-bottom: 10px;
+        margin-left: 0px;
+        margin-bottom: 8px;
+    }
+
+    body #channel, body .notif-history {
+        @include mobile-col-details;
+        min-height: unset;
+    }
+
+    body #publication {
+        @include mobile-col-details;
+        min-height: 250px;
+    }
+
+    body #notification {
+        @include mobile-col-details;
+        min-height: 100%;
+    }
+
+    .mobile {
+        display: none;
+    }
+
+    body .items {
+        width: 98%;
+        justify-content: space-around;
+        height: 37px;
+    }
+
+    body #notification .items {
+        height: 54px;
+    }
+
+    body .option {
+        width: 64%;
+    }
+
+    h2 {
+        font-size: 18px;
+        body & .number {
+            padding: 4px 10px;
+            font-size: 19px;
+        }
+        body #history & {
+            font-size: 16px;
+        }
+    }
+
+    body input[type="text"] {
+        width: 98%;
+    }
+
+    body #channel-logo {
+        width: 11%;
+        height: 32px;
+        background-size: 28px;
+    }
+
+    body .msg {
+        width: 98%;
+    }
+
+    h4 {
+        .extra-info-div & {
+            margin: 3px;
+        }
+    }
+
+    body .pub-logo {
+        width: 22%;
+    }
+
+    .align-contents {
+        .channel-heading &, .notification-heading & {
+            width: 100%;
+            border-bottom: 4px solid;
+            width: 100%;
+            margin-left: 10px;
+        }
+        & .title {
+            border-bottom: none;
+            padding-bottom: 0px;
+            width: 50%;
+        }
+    }
+
+    body .return-text {
+        margin: 0px;
+    }
+
+    body .recent-history-table th:nth-child(3), td:nth-child(3) {
+        width: 22%;
+    }
+
+    th:nth-child(1), td:nth-child(1) {
+        display: none;
+    }
+
+    body .modal-content {
+        width: 75%;
+    }
+
+    body .success-options {
+        flex-direction: column;
+        align-self: center;
+    }
+
+    body .success-options button.send-btn {
+        align-self: center;
+        width: 51%;
+    }
+
+    body [data-site='mirror.co.uk'] {
+        background-image: url('http://s3.mirror.co.uk/partners/branding/Mirror/logo-mirror@2x.png');
+        background-size: 75px;
+      }
+
+}

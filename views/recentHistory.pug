@@ -1,0 +1,28 @@
+mixin recent(notification)
+    - var email = notification.Email && notification.Email.S
+    tr
+        td= notification.Body.S
+        td= notification.Url.S
+        td= (new Date(parseInt(notification.Timestamp.N))).toLocaleString('en-GB')
+        td
+            a(href=`mailto:${email}`)=email   
+
+div(class='history-table')
+    table
+        thead
+            tr(class='table-heading-active')
+            th Body
+            th Url
+            th Date/Time
+            th Email
+
+        tbody
+            if data && data.Items && data.Items.length > 0
+                if data.Items.length < 5 
+                    each notification in data.Items
+                        +recent(notification)
+                else 
+                    each val in [0, 1, 2, 3, 4]
+                        - var notification = data.Items[val]
+                        +recent(notification)    
+

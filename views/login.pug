@@ -1,0 +1,25 @@
+extends index
+
+block content
+  p Please sign in using a @trinitymirror.com/@reachplc.com email address.
+  div(class="g-signin2" data-onsuccess="onSignIn")
+  br
+  br
+  p If the button above says "signed in", but you are unable to reach the
+  p main page, it means you are signed in on a non @trinitymirror.com/@reachplc.com
+  p account. To fix this, sign out on gmail, and sign back in here using the appropriate account.
+  script.
+    function onSignIn(googleUser) {
+      var id_token = googleUser.getAuthResponse().id_token;
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', window.location.origin + '/login/auth');
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          location.href = '/';
+        } else {
+          alert(xhr.responseText);
+        }
+      };
+      xhr.send('idtoken=' + id_token);
+    }

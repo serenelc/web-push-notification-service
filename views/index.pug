@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    meta(name="viewport", content="width=device-width")
+    link(rel="stylesheet" type="text/css" href="./style.css")
+    link(href="https://fonts.googleapis.com/css?family=Bitter" rel="stylesheet")
+    meta(name="google-signin-client_id" content="510792416878-6viltl48k7891botuq024a4drpk2o6il.apps.googleusercontent.com")
+    block head
+  body
+    script(async src="https://apis.google.com/js/platform.js")
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js', integrity='sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q', crossorigin='anonymous')
+    block header
+      div(class='header')
+        a(href='/')
+          div(class='logo')
+          div(class='head-title')
+            h1 Push Notification Service
+    block content

@@ -1,0 +1,18 @@
+extends index
+
+block content
+
+  script.
+    console.log("!{err}");
+
+  .error_block
+    
+    h1.error_block--title Internal Error
+
+    p.error_block--message=`ERROR: ${error}`
+    
+    p.error_block--instructions Please contact the Service Desk on 2323 for assistance
+    
+    if showHome
+    
+      a.error_block--link(href="/") Home
