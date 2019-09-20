@@ -60,10 +60,4 @@ When the product team requests a new publication, do the following:
 * Add it to the Push Notification Access Google Sheets for all environments:
   * If it is part of an existing publication (by this we mean actual publication and not channel so Mirror, Chronicle Live, etc) in the sheet, add a new column under it. If not, make a new header column for the publication and put the channel name underneath it - similar to the way its done for the others.
   * Starting with Bertha, duplicate one of the subsheets and rename it to EXACTLY what the channel name is. This will have the environment in brackets after. This needs to match the `name` that you've added to the new object in `publications` array. As this is configured as a pivot table, make sure the column name is the same as the publication name in the Filter section of the Pivot table editor. Now add a name to the Master sheet and put an 'x' infront of it for this new column. Now check the subsheet - the expected behaviour is that the name shows up there. 
-  
-  
-## Google Sheet URLs
-* Bertha: https://docs.google.com/spreadsheets/d/13CM_xLY4okyz8oPM36dlhTTOEtKgm-W98Dac0AxQlO8/edit#gid=1667351316
-* Stable: https://docs.google.com/spreadsheets/d/1XExhyu3CtSN_278pHRgiydLAp2RmD1zmhqp5hGxzghY/edit#gid=0
-* Prod:  https://docs.google.com/spreadsheets/d/11NQ3Cskrmkgba1LYQb8Qpre4nOmyMxSuLkAvUmKHLRk/edit?ts=5cc32679#gid=0
 
